@@ -1,26 +1,24 @@
 import java.io.Serializable;
 import java.util.ArrayList;
 
-/**
- * Classe abstraite Hebergement.
- * Represente un hebergement generique dans l'application Booking.
+/*
+ * Classe abstraite Hebergement
+ * C'est la classe de base pour tous les types d'hebergements de notre application.
+ * On la met abstraite car on ne cree jamais un "hebergement" tout seul,
+ * on cree toujours soit une ChambreHotel, soit un Appartement, soit une Villa.
  *
- * Choix de la classe abstraite : un hebergement sans type precis n'existe pas
- * concretement dans notre systeme. On reserve toujours une ChambreHotel,
- * un Appartement ou une Villa, jamais un "Hebergement" generique.
- *
- * Implements Comparable pour le tri par prix.
- * Implements Serializable pour la sauvegarde binaire (TP5).
+ * Elle implemente Comparable pour pouvoir trier par prix,
+ * et Serializable pour sauvegarder les objets dans un fichier .ser (TP5).
  */
 public abstract class Hebergement implements Comparable<Hebergement>, Serializable {
 
-    // Necessaire pour la serialisation : identifie la version de la classe
     private static final long serialVersionUID = 1L;
 
-    // Attributs prives communs a tous les hebergements
+    // attributs prives communs a tous les hebergements
     private String idUnique;
     private String nom;
     private String adressePostale;
+    private String zone;           // zone geographique de l'hebergement
     private String type;
     private int    nbMaxPersonnes;
     private double prixNuit;
@@ -29,155 +27,130 @@ public abstract class Hebergement implements Comparable<Hebergement>, Serializab
     private String lienPhotos;
     private ArrayList<String> commentairesClients;
 
-    // -------------------------------------------------------------------------
-    // Constructeurs
-    // -------------------------------------------------------------------------
 
-    /** Constructeur par defaut : valeurs neutres */
+    // --- constructeur par defaut ---
     public Hebergement() {
-        this.idUnique             = "H000";
-        this.nom                  = "Hebergement inconnu";
-        this.adressePostale       = "Adresse inconnue";
-        this.type                 = "Indefini";
-        this.nbMaxPersonnes       = 1;
-        this.prixNuit             = 0.0;
-        this.description          = "Aucune description";
-        this.equipements          = new ArrayList<String>();
-        this.lienPhotos           = "";
-        this.commentairesClients  = new ArrayList<String>();
+        this.idUnique            = "H000";
+        this.nom                 = "Hebergement inconnu";
+        this.adressePostale      = "Adresse inconnue";
+        this.zone                = "Zone inconnue";
+        this.type                = "Indefini";
+        this.nbMaxPersonnes      = 1;
+        this.prixNuit            = 0.0;
+        this.description         = "Aucune description";
+        this.equipements         = new ArrayList<String>();
+        this.lienPhotos          = "";
+        this.commentairesClients = new ArrayList<String>();
     }
 
-    /** Constructeur avec parametres */
-    public Hebergement(String idUnique, String nom, String adressePostale,
+    // --- constructeur avec parametres ---
+    public Hebergement(String idUnique, String nom, String adressePostale, String zone,
                        String type, int nbMaxPersonnes, double prixNuit,
-                       String description, ArrayList<String> equipements,
-                       String lienPhotos) {
-        this.idUnique             = idUnique;
-        this.nom                  = nom;
-        this.adressePostale       = adressePostale;
-        this.type                 = type;
-        this.nbMaxPersonnes       = nbMaxPersonnes;
-        this.prixNuit             = prixNuit;
-        this.description          = description;
-        this.equipements          = (equipements != null) ? equipements : new ArrayList<String>();
-        this.lienPhotos           = lienPhotos;
-        this.commentairesClients  = new ArrayList<String>();
+                       String description, ArrayList<String> equipements, String lienPhotos) {
+        this.idUnique            = idUnique;
+        this.nom                 = nom;
+        this.adressePostale      = adressePostale;
+        this.zone                = zone;
+        this.type                = type;
+        this.nbMaxPersonnes      = nbMaxPersonnes;
+        this.prixNuit            = prixNuit;
+        this.description         = description;
+        this.equipements         = (equipements != null) ? equipements : new ArrayList<String>();
+        this.lienPhotos          = lienPhotos;
+        this.commentairesClients = new ArrayList<String>();
     }
 
-    /** Constructeur par copie */
+    // --- constructeur par copie ---
+    // on utilise this pour referencer l'objet en cours de construction
     public Hebergement(Hebergement h) {
-        this.idUnique             = h.idUnique;
-        this.nom                  = h.nom;
-        this.adressePostale       = h.adressePostale;
-        this.type                 = h.type;
-        this.nbMaxPersonnes       = h.nbMaxPersonnes;
-        this.prixNuit             = h.prixNuit;
-        this.description          = h.description;
-        this.equipements          = new ArrayList<String>(h.equipements);
-        this.lienPhotos           = h.lienPhotos;
-        this.commentairesClients  = new ArrayList<String>(h.commentairesClients);
+        this.idUnique            = h.idUnique;
+        this.nom                 = h.nom;
+        this.adressePostale      = h.adressePostale;
+        this.zone                = h.zone;
+        this.type                = h.type;
+        this.nbMaxPersonnes      = h.nbMaxPersonnes;
+        this.prixNuit            = h.prixNuit;
+        this.description         = h.description;
+        this.equipements         = new ArrayList<String>(h.equipements);
+        this.lienPhotos          = h.lienPhotos;
+        this.commentairesClients = new ArrayList<String>(h.commentairesClients);
     }
 
-    // -------------------------------------------------------------------------
-    // Methode abstraite
-    // Chaque sous-classe definit sa propre logique de tarification.
-    // -------------------------------------------------------------------------
 
-    /**
-     * Calcule le prix total du sejour pour un nombre de nuits donne.
-     * Methode abstraite : la logique depend du type d'hebergement.
-     * @param nbNuits nombre de nuits du sejour
-     * @return prix total en euros
-     */
+    // --- methode abstraite ---
+    // chaque sous-classe calcule son prix total a sa facon
     public abstract double calculerPrixTotal(int nbNuits);
 
-    // -------------------------------------------------------------------------
-    // Getters
-    // -------------------------------------------------------------------------
 
-    public String            getIdUnique()              { return idUnique; }
-    public String            getNom()                   { return nom; }
-    public String            getAdressePostale()        { return adressePostale; }
-    public String            getType()                  { return type; }
-    public int               getNbMaxPersonnes()        { return nbMaxPersonnes; }
-    public double            getPrixNuit()              { return prixNuit; }
-    public String            getDescription()           { return description; }
-    public ArrayList<String> getEquipements()           { return equipements; }
-    public String            getLienPhotos()            { return lienPhotos; }
-    public ArrayList<String> getCommentairesClients()   { return commentairesClients; }
+    // --- getters ---
+    public String            getIdUnique()            { return idUnique; }
+    public String            getNom()                 { return nom; }
+    public String            getAdressePostale()      { return adressePostale; }
+    public String            getZone()                { return zone; }
+    public String            getType()                { return type; }
+    public int               getNbMaxPersonnes()      { return nbMaxPersonnes; }
+    public double            getPrixNuit()            { return prixNuit; }
+    public String            getDescription()         { return description; }
+    public ArrayList<String> getEquipements()         { return equipements; }
+    public String            getLienPhotos()          { return lienPhotos; }
+    public ArrayList<String> getCommentairesClients() { return commentairesClients; }
 
-    // -------------------------------------------------------------------------
-    // Setters avec validation
-    // -------------------------------------------------------------------------
 
+    // --- setters avec validation basique ---
     public void setNom(String nom) {
         if (nom == null || nom.trim().isEmpty())
-            throw new IllegalArgumentException("Le nom de l'hebergement ne peut pas etre vide.");
+            throw new IllegalArgumentException("Le nom ne peut pas etre vide.");
         this.nom = nom;
     }
 
     public void setPrixNuit(double prixNuit) {
         if (prixNuit < 0)
-            throw new IllegalArgumentException("Le prix par nuit ne peut pas etre negatif.");
+            throw new IllegalArgumentException("Le prix ne peut pas etre negatif.");
         this.prixNuit = prixNuit;
     }
 
-    public void setDescription(String description) {
-        this.description = description;
+    public void setZone(String zone) {
+        this.zone = zone;
     }
 
-    // -------------------------------------------------------------------------
-    // Autres methodes
-    // -------------------------------------------------------------------------
 
-    /**
-     * Ajoute un commentaire client a la liste.
-     * @param commentaire texte du commentaire
-     */
+    // --- methodes utilitaires ---
+
     public void ajouterCommentaire(String commentaire) {
         if (commentaire == null || commentaire.trim().isEmpty())
             throw new IllegalArgumentException("Le commentaire ne peut pas etre vide.");
-        this.commentairesClients.add(commentaire);
+        commentairesClients.add(commentaire);
     }
 
-    /**
-     * Verifie si l'hebergement est disponible pour un nombre de personnes donne.
-     * @param nbPersonnes nombre de voyageurs
-     * @return true si la capacite est suffisante
-     */
+    // verifie si l'hebergement peut accueillir le nombre de personnes demande
     public boolean estDisponiblePour(int nbPersonnes) {
         if (nbPersonnes <= 0)
             throw new IllegalArgumentException("Le nombre de personnes doit etre positif.");
         return nbPersonnes <= this.nbMaxPersonnes;
     }
 
-    /**
-     * Retourne un resume court de l'hebergement.
-     */
+    // retourne un resume sur une seule ligne (utile pour l'affichage compact)
     public String retournerResume() {
-        return "[" + type + "] " + nom + " - " + adressePostale +
-               " | " + nbMaxPersonnes + " pers. max | " + prixNuit + " EUR/nuit";
+        return "[" + type + "] " + nom + " (" + zone + ")" +
+               " - " + nbMaxPersonnes + " pers. max" +
+               " - " + prixNuit + " EUR/nuit";
     }
 
-    // -------------------------------------------------------------------------
-    // Comparable : tri par prix croissant
-    // -------------------------------------------------------------------------
 
+    // --- Comparable : on trie par prix croissant ---
     @Override
     public int compareTo(Hebergement autre) {
         return Double.compare(this.prixNuit, autre.prixNuit);
     }
 
-    // -------------------------------------------------------------------------
-    // afficher() et toString()
-    // -------------------------------------------------------------------------
 
-    /** Affiche toutes les informations de l'hebergement dans la console. */
+    // --- afficher() : affiche toutes les infos ---
     public void afficher() {
         System.out.println("==============================================");
         System.out.println("  ID          : " + idUnique);
         System.out.println("  Nom         : " + nom);
         System.out.println("  Type        : " + type);
+        System.out.println("  Zone        : " + zone);
         System.out.println("  Adresse     : " + adressePostale);
         System.out.println("  Capacite    : " + nbMaxPersonnes + " personne(s)");
         System.out.println("  Prix/nuit   : " + prixNuit + " EUR");
@@ -185,19 +158,15 @@ public abstract class Hebergement implements Comparable<Hebergement>, Serializab
         System.out.println("  Equipements : " + equipements);
         System.out.println("  Photos      : " + lienPhotos);
         if (!commentairesClients.isEmpty())
-            System.out.println("  Avis clients: " + commentairesClients);
+            System.out.println("  Avis        : " + commentairesClients);
         System.out.println("==============================================");
     }
 
+    // --- toString() ---
     @Override
     public String toString() {
-        return "Hebergement{" +
-               "id='" + idUnique + "'" +
-               ", nom='" + nom + "'" +
-               ", type='" + type + "'" +
-               ", adresse='" + adressePostale + "'" +
-               ", capacite=" + nbMaxPersonnes +
-               ", prix=" + prixNuit + " EUR/nuit" +
-               "}";
+        return "Hebergement{id='" + idUnique + "', nom='" + nom +
+               "', zone='" + zone + "', type='" + type +
+               "', capacite=" + nbMaxPersonnes + ", prix=" + prixNuit + " EUR/nuit}";
     }
 }
